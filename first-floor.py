@@ -240,7 +240,11 @@ def main():
 
     if (today.hour > -1) and (today.hour < 7):
         turn_off_ac()
-    if (temperature > 25.8) and (today.month < 10) and (today.month > 4) and (today.hour < 24) and (today.hour > 6):
+    if (temperature > 25.8) and (today.month < 6) and (today.month > 4) and (today.hour < 24) and (today.hour > 10):
+        turn_on_cool_ac()
+    if (temperature > 25.8) and (today.month < 10) and (today.month > 8) and (today.hour < 24) and (today.hour > 10):
+        turn_on_cool_ac()
+    if (temperature > 26.8) and (today.month < 9) and (today.month > 5) and (today.hour < 24) and (today.hour > 10):
         turn_on_cool_ac()
     if (temperature < 23) and (today.month < 10) and (today.month > 4):
         turn_off_ac()
