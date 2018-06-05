@@ -33,13 +33,13 @@ def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[
 # WiFi Router Plug token anf IP miplug --token e171f0529f5c458744756664b75acfa1 --ip 192.168.19.61 on
 def turn_on_humidifier():
     """Turn on humidifier on a first floor."""
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='eca25f7d91a6034a978af9900ff2d3f2', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='eca25f7d91a6034a978af9900ff2d3f2', start_id=0, debug=1, lazy_discover=True, model='chuangmi.plug.m1')
     cP.on()
 
 
 def turn_off_humidifier():
     """Turn off humidifier on a first floor."""
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='eca25f7d91a6034a978af9900ff2d3f2', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='eca25f7d91a6034a978af9900ff2d3f2', start_id=0, debug=1, lazy_discover=True, model='chuangmi.plug.m1')
     cP.off()
 
 
