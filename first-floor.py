@@ -3,8 +3,8 @@
 
 import argparse
 import re
-import logging
-import sys
+import datetime
+import requests
 
 from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattBackend
 from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
@@ -12,23 +12,108 @@ from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
 
 
 def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
-    """Check for valid mac adresses."""
+    """Check for valid mac addresses."""
     if not pat.match(mac.upper()):
-        raise argparse.ArgumentTypeError('The MAC address "{}" seems to be in the wrong format'.format(mac))
+        raise argparse.ArgumentTypeError(
+            'The MAC address "{}" seems to be in the wrong format'.format(mac))
     return mac
 
 
-def pollTempHumidity():
+def turn_on_humidifier():
+    """Turn on humidifier on a first floor."""
+    return
+
+
+def turn_off_humidifier():
+    """Turn off humidifier on a first floor."""
+    return
+
+
+def check_if_ac_cool():
+    """Check if AC is turned for a automate cooling."""
+    status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
+    response = requests.get(status_url)
+    print(response)
+    if (response.hasOwnProperty('address')) and (response.hasOwnProperty('name')):
+        if ((response.name == "08bc20043df8") and (response.address == "192.168.19.54")):
+            if not response.props.boot == 1:
+                return False
+            if not response.props.runMode == '001':
+                return False
+            if not response.props.healthy == 1:
+                return False
+            if not response.props.wdNumber == 24:
+                return False
+            if not response.props.windLevel == '001':
+                return False
+            return True
+    return None
+
+
+def check_if_ac_heat():
+    """Check if AC is turned for a automate heating."""
+    status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
+    response = requests.get(status_url)
+    print(response)
+    if (response.hasOwnProperty('address')) and (response.hasOwnProperty('name')):
+        if ((response.name == "08bc20043df8") and (response.address == "192.168.19.54")):
+            if not response.props.boot == 1:
+                return False
+            if not response.props.runMode == '100':
+                return False
+            if not response.props.healthy == 1:
+                return False
+            if not response.props.wdNumber == 24:
+                return False
+            if not response.props.windLevel == '001':
+                return False
+            return True
+    return None
+
+
+def turn_on_heat_ac():
+    """Turn on AC on a first floor for a heating if it was not."""
+    heat_url = 'http://smart.planetarium.ml:2003/heat/key/27fbc501b51b47663e77c46816a'
+    ac_heat = check_if_ac_heat()
+    if ac_heat is not None:
+        if not ac_heat:
+            response = requests.get(heat_url)
+            print(response)
+    return
+
+
+def turn_on_cool_ac():
+    """Turn on AC on a first floor for a cooling if it was not."""
+    cool_url = 'http://smart.planetarium.ml:2003/cool/key/27fbc501b51b47663e77c46816a'
+    ac_cool = check_if_ac_cool()
+    if ac_cool is not None:
+        if not ac_cool:
+            response = requests.get(cool_url)
+            print(response)
+
+
+def turn_off_ac():
+    """Turn off AC on a first floor."""
+    turn_url = 'http://smart.planetarium.ml:2003/power-off/key/27fbc501b51b47663e77c46816a'
+    response = requests.get(turn_url)
+    print(response)
+
+
+def poll_temp_humidity():
     """Poll data from the sensor."""
+    today = datetime.datetime.today()
     backend = BluepyBackend
     poller = MiTempBtPoller('58:2d:34:38:c0:91', backend)
+    temperature = poller.parameter_value(MI_TEMPERATURE)
+    humidity = poller.parameter_value(MI_HUMIDITY)
+    print("Month: {}".format(today.month))
     print("Getting data from Mi Temperature and Humidity Sensor")
     print("FW: {}".format(poller.firmware_version()))
     print("Name: {}".format(poller.name()))
     print("Battery: {}".format(poller.parameter_value(MI_BATTERY)))
     print("Temperature: {}".format(poller.parameter_value(MI_TEMPERATURE)))
     print("Humidity: {}".format(poller.parameter_value(MI_HUMIDITY)))
-
+    return (today, temperature, humidity)
 
 # def scan(args):
 #     """Scan for sensors."""
@@ -51,7 +136,24 @@ def main():
     """Main function.
 
     """
-    pollTempHumidity()
+    check_if_ac_cool()
+    (today, temperature, humidity) = poll_temp_humidity()
+    if (temperature > 25) and (today.month < 10) and (today.month > 4):
+        turn_on_cool_ac()
+    if (temperature < 23.5) and (today.month < 10) and (today.month > 4):
+        turn_off_ac()
+    if (temperature < 20) and (today.month > 9) and (today.month < 5):
+        turn_on_heat_ac()
+    if (temperature > 22) and (today.month > 9) and (today.month < 5):
+        turn_off_ac()
+    if (humidity > 49) and (today.month < 10) and (today.month > 4):
+        turn_on_humidifier()
+    if (humidity < 30) and (today.month < 10) and (today.month > 4):
+        turn_off_humidifier()
+    if (humidity < 23) and (today.month > 9) and (today.month < 5):
+        turn_on_humidifier()
+    if (humidity > 40) and (today.month > 9) and (today.month < 5):
+        turn_off_humidifier()
 
 
 if __name__ == '__main__':
