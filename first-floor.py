@@ -32,19 +32,19 @@ def turn_off_humidifier():
 def check_if_ac_cool():
     """Check if AC is turned for a automate cooling."""
     status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
-    response = requests.get(status_url)
-    print(response)
-    if (response.hasOwnProperty('address')) and (response.hasOwnProperty('name')):
-        if ((response.name == "08bc20043df8") and (response.address == "192.168.19.54")):
-            if not response.props.boot == 1:
+    response = requests.get(status_url, timeout=(20, 30))
+    print(response.json())
+    if (response.json().hasOwnProperty('address')) and (response.json().hasOwnProperty('name')):
+        if ((response.json().name == "08bc20043df8") and (response.json().address == "192.168.19.54")):
+            if not response.json().props.boot == 1:
                 return False
-            if not response.props.runMode == '001':
+            if not response.json().props.runMode == '001':
                 return False
-            if not response.props.healthy == 1:
+            if not response.json().props.healthy == 1:
                 return False
-            if not response.props.wdNumber == 24:
+            if not response.json().props.wdNumber == 24:
                 return False
-            if not response.props.windLevel == '001':
+            if not response.json().props.windLevel == '001':
                 return False
             return True
     return None
@@ -53,19 +53,19 @@ def check_if_ac_cool():
 def check_if_ac_heat():
     """Check if AC is turned for a automate heating."""
     status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
-    response = requests.get(status_url)
-    print(response)
-    if (response.hasOwnProperty('address')) and (response.hasOwnProperty('name')):
-        if ((response.name == "08bc20043df8") and (response.address == "192.168.19.54")):
-            if not response.props.boot == 1:
+    response = requests.get(status_url, timeout=(20, 30))
+    print(response.json())
+    if (response.json().hasOwnProperty('address')) and (response.json().hasOwnProperty('name')):
+        if ((response.json().name == "08bc20043df8") and (response.json().address == "192.168.19.54")):
+            if not response.json().props.boot == 1:
                 return False
-            if not response.props.runMode == '100':
+            if not response.json().props.runMode == '100':
                 return False
-            if not response.props.healthy == 1:
+            if not response.json().props.healthy == 1:
                 return False
-            if not response.props.wdNumber == 24:
+            if not response.json().props.wdNumber == 24:
                 return False
-            if not response.props.windLevel == '001':
+            if not response.json().props.windLevel == '001':
                 return False
             return True
     return None
@@ -77,8 +77,8 @@ def turn_on_heat_ac():
     ac_heat = check_if_ac_heat()
     if ac_heat is not None:
         if not ac_heat:
-            response = requests.get(heat_url)
-            print(response)
+            response = requests.get(heat_url, timeout=(20, 30))
+            print(response.json())
     return
 
 
@@ -88,15 +88,15 @@ def turn_on_cool_ac():
     ac_cool = check_if_ac_cool()
     if ac_cool is not None:
         if not ac_cool:
-            response = requests.get(cool_url)
-            print(response)
+            response = requests.get(cool_url, timeout=(20, 30))
+            print(response.json())
 
 
 def turn_off_ac():
     """Turn off AC on a first floor."""
     turn_url = 'http://smart.planetarium.ml:2003/power-off/key/27fbc501b51b47663e77c46816a'
-    response = requests.get(turn_url)
-    print(response)
+    response = requests.get(turn_url, timeout=(20, 30))
+    print(response.json())
 
 
 def poll_temp_humidity():
