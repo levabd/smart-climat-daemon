@@ -34,7 +34,7 @@ def check_if_ac_cool():
     status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
     print(response.json())
-    if (address in response.json()) and (name in response.json()):
+    if ('address' in response.json()) and ('name' in response.json()):
         if ((response.json().name == "08bc20043df8") and (response.json().address == "192.168.19.54")):
             if not response.json().props.boot == 1:
                 return False
@@ -55,7 +55,7 @@ def check_if_ac_heat():
     status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
     print(response.json())
-    if (address in response.json()) and (name in response.json()):
+    if ('address' in response.json()) and ('name' in response.json()):
         if ((response.json().name == "08bc20043df8") and (response.json().address == "192.168.19.54")):
             if not response.json().props.boot == 1:
                 return False
