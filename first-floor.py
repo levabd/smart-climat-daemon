@@ -35,16 +35,16 @@ def check_if_ac_cool():
     response = requests.get(status_url, timeout=(20, 30))
     print(response.json())
     if ('address' in response.json()) and ('name' in response.json()):
-        if ((response.json().name == "08bc20043df8") and (response.json().address == "192.168.19.54")):
-            if not response.json().props.boot == 1:
+        if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
+            if not response.json()['props']['boot'] == 1:
                 return False
-            if not response.json().props.runMode == '001':
+            if not response.json()['props']['runMode'] == '001':
                 return False
-            if not response.json().props.healthy == 1:
+            if not response.json()['props']['healthy'] == 1:
                 return False
-            if not response.json().props.wdNumber == 24:
+            if not response.json()['props']['wdNumber'] == 24:
                 return False
-            if not response.json().props.windLevel == '001':
+            if not response.json()['props']['windLevel'] == '001':
                 return False
             return True
     return None
@@ -56,16 +56,16 @@ def check_if_ac_heat():
     response = requests.get(status_url, timeout=(20, 30))
     print(response.json())
     if ('address' in response.json()) and ('name' in response.json()):
-        if ((response.json().name == "08bc20043df8") and (response.json().address == "192.168.19.54")):
-            if not response.json().props.boot == 1:
+        if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
+            if not response.json()['props']['boot'] == 1:
                 return False
-            if not response.json().props.runMode == '100':
+            if not response.json()['props']['runMode'] == '100':
                 return False
-            if not response.json().props.healthy == 1:
+            if not response.json()['props']['healthy'] == 1:
                 return False
-            if not response.json().props.wdNumber == 24:
+            if not response.json()['props']['wdNumber'] == 24:
                 return False
-            if not response.json().props.windLevel == '001':
+            if not response.json()['props']['windLevel'] == '001':
                 return False
             return True
     return None
