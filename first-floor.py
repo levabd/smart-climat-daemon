@@ -33,7 +33,6 @@ def check_if_ac_cool():
     """Check if AC is turned for a automate cooling."""
     status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
-    print(response.json())
     if ('address' in response.json()) and ('name' in response.json()):
         if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
             if not response.json()['props']['boot'] == 1:
@@ -54,7 +53,6 @@ def check_if_ac_heat():
     """Check if AC is turned for a automate heating."""
     status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
-    print(response.json())
     if ('address' in response.json()) and ('name' in response.json()):
         if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
             if not response.json()['props']['boot'] == 1:
@@ -88,7 +86,7 @@ def turn_on_cool_ac():
     ac_cool = check_if_ac_cool()
     if ac_cool is not None:
         if not ac_cool:
-            response = requests.get(cool_url, timeout=(20, 30))
+            response = requests.get(cool_url)
             print(response.json())
 
 
