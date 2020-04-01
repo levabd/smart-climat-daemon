@@ -75,7 +75,7 @@ def turn_on_heat_ac():
     ac_heat = check_if_ac_heat()
     if ac_heat is not None:
         if not ac_heat:
-            response = requests.get(heat_url, timeout=(20, 30))
+            response = requests.get(heat_url)
             print(response.json())
     return
 
@@ -93,7 +93,7 @@ def turn_on_cool_ac():
 def turn_off_ac():
     """Turn off AC on a first floor."""
     turn_url = 'http://smart.planetarium.ml:2003/power-off/key/27fbc501b51b47663e77c46816a'
-    response = requests.get(turn_url, timeout=(20, 30))
+    response = requests.get(turn_url)
     print(response.json())
 
 
