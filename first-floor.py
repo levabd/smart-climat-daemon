@@ -6,6 +6,7 @@ import re
 import datetime
 import requests
 
+from miio import chuangmi_plug
 from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattBackend
 from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
     MI_TEMPERATURE, MI_HUMIDITY, MI_BATTERY
@@ -21,12 +22,14 @@ def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[
 
 def turn_on_humidifier():
     """Turn on humidifier on a first floor."""
-    return
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='56e74499dda17df9068e0a0cb00213f9', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
+    cP.on()
 
 
 def turn_off_humidifier():
     """Turn off humidifier on a first floor."""
-    return
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='56e74499dda17df9068e0a0cb00213f9', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
+    cP.off()
 
 
 def check_if_ac_cool():
@@ -41,7 +44,7 @@ def check_if_ac_cool():
                 return False
             if not response.json()['props']['healthy'] == 1:
                 return False
-            if not response.json()['props']['wdNumber'] == 24:
+            if not response.json()['props']['wdNumber'] == 25:
                 return False
             if not response.json()['props']['windLevel'] == '001':
                 return False
@@ -61,7 +64,7 @@ def check_if_ac_heat():
                 return False
             if not response.json()['props']['healthy'] == 1:
                 return False
-            if not response.json()['props']['wdNumber'] == 24:
+            if not response.json()['props']['wdNumber'] == 23:
                 return False
             if not response.json()['props']['windLevel'] == '001':
                 return False
