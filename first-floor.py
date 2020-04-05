@@ -6,7 +6,7 @@ import re
 import datetime
 import requests
 
-from miio import chuangmi_plug
+from python-miio import chuangmi_plug
 from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattBackend
 from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
     MI_TEMPERATURE, MI_HUMIDITY, MI_BATTERY
