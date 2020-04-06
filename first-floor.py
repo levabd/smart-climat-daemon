@@ -6,7 +6,7 @@ import re
 import datetime
 import requests
 
-from python-miio import chuangmi_plug
+from miio import chuangmi_plug
 from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattBackend
 from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
     MI_TEMPERATURE, MI_HUMIDITY, MI_BATTERY
@@ -149,9 +149,9 @@ def main():
     if (temperature > 22) and (today.month > 9) and (today.month < 5):
         turn_off_ac()
     if (humidity > 49) and (today.month < 10) and (today.month > 4):
-        turn_on_humidifier()
-    if (humidity < 30) and (today.month < 10) and (today.month > 4):
         turn_off_humidifier()
+    if (humidity < 30) and (today.month < 10) and (today.month > 4):
+        turn_on_humidifier()
     if (humidity < 23) and (today.month > 9) and (today.month < 5):
         turn_on_humidifier()
     if (humidity > 40) and (today.month > 9) and (today.month < 5):
