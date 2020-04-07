@@ -138,7 +138,6 @@ def main():
 
     """
     # check_if_ac_cool()
-    turn_on_humidifier()
     (today, temperature, humidity) = poll_temp_humidity()
     if (temperature > 25) and (today.month < 10) and (today.month > 4):
         turn_on_cool_ac()
