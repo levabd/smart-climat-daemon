@@ -139,7 +139,7 @@ def main():
     """
     # check_if_ac_cool()
     (today, temperature, humidity) = poll_temp_humidity()
-    if (temperature > 25) and (today.month < 10) and (today.month > 4):
+    if (temperature > 25.8) and (today.month < 10) and (today.month > 4):
         turn_on_cool_ac()
     if (temperature < 23) and (today.month < 10) and (today.month > 4):
         turn_off_ac()
