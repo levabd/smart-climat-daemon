@@ -34,7 +34,7 @@ def turn_off_humidifier():
 
 def check_if_ac_cool():
     """Check if AC is turned for a automate cooling."""
-    status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
+    status_url = 'http://smart.levabd.pp.ua:2003/status/key/27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
     if ('address' in response.json()) and ('name' in response.json()):
         if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
@@ -54,7 +54,7 @@ def check_if_ac_cool():
 
 def check_if_ac_heat():
     """Check if AC is turned for a automate heating."""
-    status_url = 'http://smart.planetarium.ml:2003/status/key/27fbc501b51b47663e77c46816a'
+    status_url = 'http://smart.levabd.pp.ua:2003/status/key/27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
     if ('address' in response.json()) and ('name' in response.json()):
         if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
@@ -74,7 +74,7 @@ def check_if_ac_heat():
 
 def turn_on_heat_ac():
     """Turn on AC on a first floor for a heating if it was not."""
-    heat_url = 'http://smart.planetarium.ml:2003/heat/key/27fbc501b51b47663e77c46816a'
+    heat_url = 'http://smart.levabd.pp.ua:2003/heat/key/27fbc501b51b47663e77c46816a'
     ac_heat = check_if_ac_heat()
     if ac_heat is not None:
         if not ac_heat:
@@ -85,7 +85,7 @@ def turn_on_heat_ac():
 
 def turn_on_cool_ac():
     """Turn on AC on a first floor for a cooling if it was not."""
-    cool_url = 'http://smart.planetarium.ml:2003/cool/key/27fbc501b51b47663e77c46816a'
+    cool_url = 'http://smart.levabd.pp.ua:2003/cool/key/27fbc501b51b47663e77c46816a'
     ac_cool = check_if_ac_cool()
     if ac_cool is not None:
         if not ac_cool:
@@ -95,7 +95,7 @@ def turn_on_cool_ac():
 
 def turn_off_ac():
     """Turn off AC on a first floor."""
-    turn_url = 'http://smart.planetarium.ml:2003/power-off/key/27fbc501b51b47663e77c46816a'
+    turn_url = 'http://smart.levabd.pp.ua:2003/power-off/key/27fbc501b51b47663e77c46816a'
     response = requests.get(turn_url)
     print(response.json())
 
@@ -139,6 +139,8 @@ def main():
     """
     # check_if_ac_cool()
     (today, temperature, humidity) = poll_temp_humidity()
+    print(today.month)
+    print(today.hour)
     if (temperature > 25.8) and (today.month < 10) and (today.month > 4):
         turn_on_cool_ac()
     if (temperature < 23) and (today.month < 10) and (today.month > 4):
