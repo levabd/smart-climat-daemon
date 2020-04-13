@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Demo file showing how to use the mitemp library."""
 
+import os
 import argparse
 import re
 import datetime
@@ -11,6 +12,12 @@ from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattB
 from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
     MI_TEMPERATURE, MI_HUMIDITY, MI_BATTERY
 
+triedTurnedOff = int(os.environ['TRIEDTURNEDOFF'])
+wasTurnedOff = int(os.environ['WASTURNEDOFF'])
+triedTurnedCool = int(os.environ['TRIEDTURNEDCOOL'])
+wasTurnedCool = int(os.environ['WASTURNEDCOOL'])
+triedTurnedHeat = int(os.environ['TRIEDTURNEDHEAT'])
+wasTurnedHeat = int(os.environ['WASTURNEDHEAT'])
 
 def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
     """Check for valid mac addresses."""
@@ -31,6 +38,17 @@ def turn_off_humidifier():
     cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='56e74499dda17df9068e0a0cb00213f9', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
     cP.off()
 
+
+def check_if_ac_off():
+    """Check if AC is turned off."""
+    status_url = 'http://smart.levabd.pp.ua:2003/status/key/27fbc501b51b47663e77c46816a'
+    response = requests.get(status_url, timeout=(20, 30))
+    if ('address' in response.json()) and ('name' in response.json()):
+        if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
+            if response.json()['props']['boot'] == 0:
+                return True
+            return False
+    return None
 
 def check_if_ac_cool():
     """Check if AC is turned for a automate cooling."""
@@ -74,30 +92,68 @@ def check_if_ac_heat():
 
 def turn_on_heat_ac():
     """Turn on AC on a first floor for a heating if it was not."""
+    if (wasTurnedHeat == 1) and not (triedTurnedHeat == 1):
+        return
     heat_url = 'http://smart.levabd.pp.ua:2003/heat/key/27fbc501b51b47663e77c46816a'
     ac_heat = check_if_ac_heat()
     if ac_heat is not None:
         if not ac_heat:
+            os.environ['TRIEDTURNEDHEAT'] = '1'
+            os.environ['WASTURNEDHEAT'] = '0'
             response = requests.get(heat_url)
             print(response.json())
-    return
+        else:
+            if (triedTurnedHeat == 1):
+                os.environ['TRIEDTURNEDOFF'] = '0'
+                os.environ['WASTURNEDOFF'] = '0'
+                os.environ['TRIEDTURNEDCOOL'] = '0'
+                os.environ['WASTURNEDCOOL'] = '0'
+                os.environ['TRIEDTURNEDHEAT'] = '0'
+                os.environ['WASTURNEDHEAT'] = '1'
 
 
 def turn_on_cool_ac():
     """Turn on AC on a first floor for a cooling if it was not."""
+    if (wasTurnedCool == 1) and not (triedTurnedCool == 1):
+        return
     cool_url = 'http://smart.levabd.pp.ua:2003/cool/key/27fbc501b51b47663e77c46816a'
     ac_cool = check_if_ac_cool()
     if ac_cool is not None:
         if not ac_cool:
+            os.environ['TRIEDTURNEDCOOL'] = '1'
+            os.environ['WASTURNEDCOOL'] = '0'
             response = requests.get(cool_url)
             print(response.json())
+        else:
+            if (triedTurnedCool == 1):
+                os.environ['TRIEDTURNEDOFF'] = '0'
+                os.environ['WASTURNEDOFF'] = '0'
+                os.environ['TRIEDTURNEDCOOL'] = '0'
+                os.environ['WASTURNEDCOOL'] = '1'
+                os.environ['TRIEDTURNEDHEAT'] = '0'
+                os.environ['WASTURNEDHEAT'] = '0'
 
 
 def turn_off_ac():
     """Turn off AC on a first floor."""
+    if (wasTurnedOff == 1) and not (triedTurnedOff == 1):
+        return
     turn_url = 'http://smart.levabd.pp.ua:2003/power-off/key/27fbc501b51b47663e77c46816a'
-    response = requests.get(turn_url)
-    print(response.json())
+    ac_off = check_if_ac_off()
+    if ac_off is not None:
+        if not ac_off:
+            os.environ['TRIEDTURNEDOFF'] = '1'
+            os.environ['WASTURNEDOFF'] = '0'
+            response = requests.get(turn_url)
+            print(response.json())
+        else:
+            if (triedTurnedOff == 1):
+                os.environ['TRIEDTURNEDOFF'] = '0'
+                os.environ['WASTURNEDOFF'] = '1'
+                os.environ['TRIEDTURNEDCOOL'] = '0'
+                os.environ['WASTURNEDCOOL'] = '0'
+                os.environ['TRIEDTURNEDHEAT'] = '0'
+                os.environ['WASTURNEDHEAT'] = '0'
 
 
 def poll_temp_humidity():
@@ -157,6 +213,15 @@ def main():
         turn_on_humidifier()
     if (humidity > 40) and (today.month > 9) and (today.month < 5):
         turn_off_humidifier()
+    
+    # clear env at night
+    if (today.hour == 4):
+        os.environ['TRIEDTURNEDOFF'] = '0'
+        os.environ['WASTURNEDOFF'] = '0'
+        os.environ['TRIEDTURNEDCOOL'] = '0'
+        os.environ['WASTURNEDCOOL'] = '0'
+        os.environ['TRIEDTURNEDHEAT'] = '0'
+        os.environ['WASTURNEDHEAT'] = '0'
 
 
 if __name__ == '__main__':
