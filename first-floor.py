@@ -2,6 +2,7 @@
 """Demo file showing how to use the mitemp library."""
 
 import os
+import json
 import argparse
 import re
 import datetime
@@ -12,12 +13,22 @@ from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattB
 from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
     MI_TEMPERATURE, MI_HUMIDITY, MI_BATTERY
 
-triedTurnedOff = int(os.environ['TRIEDTURNEDOFF'])
-wasTurnedOff = int(os.environ['WASTURNEDOFF'])
-triedTurnedCool = int(os.environ['TRIEDTURNEDCOOL'])
-wasTurnedCool = int(os.environ['WASTURNEDCOOL'])
-triedTurnedHeat = int(os.environ['TRIEDTURNEDHEAT'])
-wasTurnedHeat = int(os.environ['WASTURNEDHEAT'])
+state = {}
+state['triedTurnedOff'] = 0
+state['wasTurnedOff'] = 0
+state['triedTurnedCool'] = 0
+state['wasTurnedCool'] = 0
+state['triedTurnedHeat'] = 0
+state['wasTurnedHeat'] = 0
+with open('ac_state.json', 'w') as f:
+    json.dump(state, f)
+
+triedTurnedOff = int(os.environ["TRIEDTURNEDOFF"])
+wasTurnedOff = int(os.environ["WASTURNEDOFF"])
+triedTurnedCool = int(os.environ["TRIEDTURNEDCOOL"])
+wasTurnedCool = int(os.environ["WASTURNEDCOOL"])
+triedTurnedHeat = int(os.environ["TRIEDTURNEDHEAT"])
+wasTurnedHeat = int(os.environ["WASTURNEDHEAT"])
 
 def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
     """Check for valid mac addresses."""
@@ -98,18 +109,18 @@ def turn_on_heat_ac():
     ac_heat = check_if_ac_heat()
     if ac_heat is not None:
         if not ac_heat:
-            os.environ['TRIEDTURNEDHEAT'] = '1'
-            os.environ['WASTURNEDHEAT'] = '0'
+            os.environ["TRIEDTURNEDHEAT"] = "1"
+            os.environ["WASTURNEDHEAT"] = "0"
             response = requests.get(heat_url)
             print(response.json())
         else:
             if (triedTurnedHeat == 1):
-                os.environ['TRIEDTURNEDOFF'] = '0'
-                os.environ['WASTURNEDOFF'] = '0'
-                os.environ['TRIEDTURNEDCOOL'] = '0'
-                os.environ['WASTURNEDCOOL'] = '0'
-                os.environ['TRIEDTURNEDHEAT'] = '0'
-                os.environ['WASTURNEDHEAT'] = '1'
+                os.environ["TRIEDTURNEDOFF"] = "0"
+                os.environ["WASTURNEDOFF"] = "0"
+                os.environ["TRIEDTURNEDCOOL"] = "0"
+                os.environ["WASTURNEDCOOL"] = "0"
+                os.environ["TRIEDTURNEDHEAT"] = "0"
+                os.environ["WASTURNEDHEAT"] = "1"
 
 
 def turn_on_cool_ac():
@@ -120,18 +131,18 @@ def turn_on_cool_ac():
     ac_cool = check_if_ac_cool()
     if ac_cool is not None:
         if not ac_cool:
-            os.environ['TRIEDTURNEDCOOL'] = '1'
-            os.environ['WASTURNEDCOOL'] = '0'
+            os.environ["TRIEDTURNEDCOOL"] = "1"
+            os.environ["WASTURNEDCOOL"] = "0"
             response = requests.get(cool_url)
             print(response.json())
         else:
             if (triedTurnedCool == 1):
-                os.environ['TRIEDTURNEDOFF'] = '0'
-                os.environ['WASTURNEDOFF'] = '0'
-                os.environ['TRIEDTURNEDCOOL'] = '0'
-                os.environ['WASTURNEDCOOL'] = '1'
-                os.environ['TRIEDTURNEDHEAT'] = '0'
-                os.environ['WASTURNEDHEAT'] = '0'
+                os.environ["TRIEDTURNEDOFF"] = "0"
+                os.environ["WASTURNEDOFF"] = "1"
+                os.environ["TRIEDTURNEDCOOL"] = "0"
+                os.environ["WASTURNEDCOOL"] = "1"
+                os.environ["TRIEDTURNEDHEAT"] = "0"
+                os.environ["WASTURNEDHEAT"] = "0"
 
 
 def turn_off_ac():
@@ -142,18 +153,18 @@ def turn_off_ac():
     ac_off = check_if_ac_off()
     if ac_off is not None:
         if not ac_off:
-            os.environ['TRIEDTURNEDOFF'] = '1'
-            os.environ['WASTURNEDOFF'] = '0'
+            os.environ["TRIEDTURNEDOFF"] = "1"
+            os.environ["WASTURNEDOFF"] = "0"
             response = requests.get(turn_url)
             print(response.json())
         else:
             if (triedTurnedOff == 1):
-                os.environ['TRIEDTURNEDOFF'] = '0'
-                os.environ['WASTURNEDOFF'] = '1'
-                os.environ['TRIEDTURNEDCOOL'] = '0'
-                os.environ['WASTURNEDCOOL'] = '0'
-                os.environ['TRIEDTURNEDHEAT'] = '0'
-                os.environ['WASTURNEDHEAT'] = '0'
+                os.environ["TRIEDTURNEDOFF"] = "0"
+                os.environ["WASTURNEDOFF"] = "1"
+                os.environ["TRIEDTURNEDCOOL"] = "0"
+                os.environ["WASTURNEDCOOL"] = "0"
+                os.environ["TRIEDTURNEDHEAT"] = "0"
+                os.environ["WASTURNEDHEAT"] = "0"
 
 
 def poll_temp_humidity():
@@ -216,12 +227,12 @@ def main():
     
     # clear env at night
     if (today.hour == 4):
-        os.environ['TRIEDTURNEDOFF'] = '0'
-        os.environ['WASTURNEDOFF'] = '0'
-        os.environ['TRIEDTURNEDCOOL'] = '0'
-        os.environ['WASTURNEDCOOL'] = '0'
-        os.environ['TRIEDTURNEDHEAT'] = '0'
-        os.environ['WASTURNEDHEAT'] = '0'
+        os.environ["TRIEDTURNEDOFF"] = "0"
+        os.environ["WASTURNEDOFF"] = "0"
+        os.environ["TRIEDTURNEDCOOL"] = "0"
+        os.environ["WASTURNEDCOOL"] = "0"
+        os.environ["TRIEDTURNEDHEAT"] = "0"
+        os.environ["WASTURNEDHEAT"] = "0"
 
 
 if __name__ == '__main__':
