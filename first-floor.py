@@ -58,8 +58,6 @@ def check_if_ac_cool():
                 return False
             if not response.json()['props']['runMode'] == '001':
                 return False
-            if not response.json()['props']['healthy'] == 1:
-                return False
             if not response.json()['props']['wdNumber'] == 25:
                 return False
             if not response.json()['props']['windLevel'] == '001':
@@ -77,8 +75,6 @@ def check_if_ac_heat():
             if not response.json()['props']['boot'] == 1:
                 return False
             if not response.json()['props']['runMode'] == '100':
-                return False
-            if not response.json()['props']['healthy'] == 1:
                 return False
             if not response.json()['props']['wdNumber'] == 23:
                 return False
