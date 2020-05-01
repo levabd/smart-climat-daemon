@@ -208,6 +208,10 @@ def main():
     if (humidity > 40) and (today.month > 9) and (today.month < 5):
         turn_off_humidifier()
     
+    # Prevent Sleep of Xiaomi Smart Plug
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='56e74499dda17df9068e0a0cb00213f9', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
+    print(cP.status())
+
     # clear env at night
     if (today.hour == 4):
         state['triedTurnedOff'] = 0
