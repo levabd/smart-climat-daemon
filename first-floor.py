@@ -2,11 +2,16 @@
 """Demo file showing how to use the mitemp library."""
 
 import os
+import subprocess
+import paramiko
 import json
 import argparse
 import re
 import datetime
 import requests
+
+# cmd = ['ssh', 'smart',
+#        'mkdir -p /home/levabd/smart-home-temp-humidity-monitor; cat - > /home/levabd/smart-home-temp-humidity-monitor/lr.json']
 
 from miio import chuangmi_plug
 from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattBackend
@@ -149,6 +154,22 @@ def turn_off_ac():
                 state['triedTurnedHeat'] = 0
                 state['wasTurnedHeat'] = 0
 
+def recordTempHumid(temperature, humidity):
+    dicty = {
+        "temperature": temperature,
+        "humidity": humidity
+        }
+
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect('smart.levabd.pp.ua', username='levabd', password='vapipu280.')
+    sftp = ssh.open_sftp()
+
+    with sftp.open('lr.json', 'w') as outfile:
+        json.dump(dicty, outfile)
+
+    ssh.close()
+
 
 def poll_temp_humidity():
     """Poll data frstate['triedTurnedOff']om the sensor."""
@@ -211,6 +232,9 @@ def main():
     # Prevent Sleep of Xiaomi Smart Plug
     cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='56e74499dda17df9068e0a0cb00213f9', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
     print(cP.status())
+
+    # Record temperature and humidity for monitor
+    recordTempHumid(temperature, humidity)
 
     # clear env at night
     if (today.hour == 4):
