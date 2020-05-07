@@ -162,10 +162,10 @@ def recordTempHumid(temperature, humidity):
 
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect('smart.levabd.pp.ua', username='levabd', password='vapipu280.')
+    ssh.connect('smart.levabd.pp.ua', port = 2001, username='levabd', password='vapipu280.')
     sftp = ssh.open_sftp()
 
-    with sftp.open('lr.json', 'w') as outfile:
+    with sftp.open('smart-home-temp-humidity-monitor/lr.json', 'w') as outfile:
         json.dump(dicty, outfile)
 
     ssh.close()
