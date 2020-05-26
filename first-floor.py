@@ -146,7 +146,7 @@ def turn_off_ac():
             response = requests.get(turn_url)
             print(response.json())
         else:
-            if (state['triedTurnedOff'] == 1):
+            if state['triedTurnedOff'] == 1:
                 state['triedTurnedOff'] = 0
                 state['wasTurnedOff'] = 1
                 state['triedTurnedCool'] = 0
@@ -210,16 +210,6 @@ def main():
     """
     # check_if_ac_cool()
     (today, temperature, humidity) = poll_temp_humidity()
-    if (today.hour > -1) and (today.hour < 7):
-        turn_off_ac()
-    if (temperature > 25.8) and (today.month < 10) and (today.month > 4) and (today.hour < 24) and (today.hour > 6):
-        turn_on_cool_ac()
-    if (temperature < 23) and (today.month < 10) and (today.month > 4):
-        turn_off_ac()
-    if (temperature < 20) and (today.month > 9) and (today.month < 5) and (today.hour < 24) and (today.hour > 6):
-        turn_on_heat_ac()
-    if (temperature > 22) and (today.month > 9) and (today.month < 5):
-        turn_off_ac()
     if (humidity > 39) and (today.month < 10) and (today.month > 4):
         turn_off_humidifier()
     if (humidity < 30) and (today.month < 10) and (today.month > 4):
@@ -230,14 +220,14 @@ def main():
         turn_off_humidifier()
     
     # Prevent Sleep of Xiaomi Smart Plug
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='56e74499dda17df9068e0a0cb00213f9', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='eca25f7d91a6034a978af9900ff2d3f2', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
     print(cP.status())
 
     # Record temperature and humidity for monitor
     recordTempHumid(temperature, humidity)
 
     # clear env at night
-    if (today.hour == 4):
+    if today.hour == 4:
         state['triedTurnedOff'] = 0
         state['wasTurnedOff'] = 0
         state['triedTurnedCool'] = 0
@@ -247,6 +237,17 @@ def main():
 
     with open('ac_state.json', 'w') as f:
         json.dump(state, f)
+
+    if (today.hour > -1) and (today.hour < 7):
+        turn_off_ac()
+    if (temperature > 25.8) and (today.month < 10) and (today.month > 4) and (today.hour < 24) and (today.hour > 6):
+        turn_on_cool_ac()
+    if (temperature < 23) and (today.month < 10) and (today.month > 4):
+        turn_off_ac()
+    if (temperature < 20) and (today.month > 9) and (today.month < 5) and (today.hour < 24) and (today.hour > 6):
+        turn_on_heat_ac()
+    if (temperature > 22) and (today.month > 9) and (today.month < 5):
+        turn_off_ac()
 
 
 if __name__ == '__main__':
