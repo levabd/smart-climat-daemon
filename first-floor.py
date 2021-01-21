@@ -249,8 +249,8 @@ def main():
         turn_on_cool_ac()
     if (temperature < 23.5) and (today.month < 10) and (today.month > 4):
         turn_off_ac()
-    if (temperature < 20) and (today.month > 9) and (today.month < 5) and (today.hour < 24) and (today.hour > 9):
-        turn_on_heat_ac()
+    # if (temperature < 20) and (today.month > 9) and (today.month < 5) and (today.hour < 24) and (today.hour > 9):
+    #     turn_on_heat_ac()
     if (temperature > 22) and (today.month > 9) and (today.month < 5):
         turn_off_ac()
 
