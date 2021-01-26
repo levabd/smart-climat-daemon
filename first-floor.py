@@ -221,7 +221,7 @@ def main():
         turn_off_humidifier()
     
     # Prevent Sleep of Xiaomi Smart Plug
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='eca25f7d91a6034a978af9900ff2d3f2', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='19410e3ece105ad2b340adf64cab049a', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
     print(cP.status())
 
     # Record temperature and humidity for monitor
