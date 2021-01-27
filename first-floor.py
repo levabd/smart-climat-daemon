@@ -211,17 +211,17 @@ def main():
     """
     # check_if_ac_cool()
     (today, temperature, humidity) = poll_temp_humidity()
-    if (humidity > 39) and (today.month < 10) and (today.month > 4):
+    if (humidity > 49) and (today.month < 10) and (today.month > 4):
         turn_off_humidifier()
-    if (humidity < 30) and (today.month < 10) and (today.month > 4):
+    if (humidity < 31) and (today.month < 10) and (today.month > 4):
         turn_on_humidifier()
-    if (humidity < 23) and (today.month > 9) and (today.month < 5):
+    if (humidity < 40) and (today.month > 9) and (today.month < 5):
         turn_on_humidifier()
-    if (humidity > 40) and (today.month > 9) and (today.month < 5):
+    if (humidity > 49) and (today.month > 9) and (today.month < 5):
         turn_off_humidifier()
     
     # Prevent Sleep of Xiaomi Smart Plug
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='19410e3ece105ad2b340adf64cab049a', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='14f5b868a58ef4ffaef6fece61c65b16', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
     print(cP.status())
 
     # Record temperature and humidity for monitor
