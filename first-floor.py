@@ -20,7 +20,7 @@ from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
     MI_TEMPERATURE, MI_HUMIDITY, MI_BATTERY
 
 state = {}
-f = open('ac_state.json')
+f = open('/home/pi/smart-climat-daemon/ac_state.json')
 state = json.load(f)
 
 def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
@@ -30,22 +30,21 @@ def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[
             'The MAC address "{}" seems to be in the wrong format'.format(mac))
     return mac
 
-# WiFi Router Plug token anf IP miplug --token e171f0529f5c458744756664b75acfa1 --ip 192.168.19.61 on
 def turn_on_humidifier():
     """Turn on humidifier on a first floor."""
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='eca25f7d91a6034a978af9900ff2d3f2', start_id=0, debug=1, lazy_discover=True, model='chuangmi.plug.m1')
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='14f5b868a58ef4ffaef6fece61c65b16', start_id=0, debug=1, lazy_discover=True, model='chuangmi.plug.m1')
     cP.on()
 
 
 def turn_off_humidifier():
     """Turn off humidifier on a first floor."""
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='eca25f7d91a6034a978af9900ff2d3f2', start_id=0, debug=1, lazy_discover=True, model='chuangmi.plug.m1')
+    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='14f5b868a58ef4ffaef6fece61c65b16', start_id=0, debug=1, lazy_discover=True, model='chuangmi.plug.m1')
     cP.off()
 
 
 def check_if_ac_off():
     """Check if AC is turned off."""
-    status_url = 'http://smart.levabd.pp.ua:2003/status/key/27fbc501b51b47663e77c46816a'
+    status_url = 'http://smart.levabd.pp.ua:2002/status-bedroom?key=27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
     if ('address' in response.json()) and ('name' in response.json()):
         if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
@@ -56,7 +55,7 @@ def check_if_ac_off():
 
 def check_if_ac_cool():
     """Check if AC is turned for a automate cooling."""
-    status_url = 'http://smart.levabd.pp.ua:2003/status/key/27fbc501b51b47663e77c46816a'
+    status_url = 'http://smart.levabd.pp.ua:2002/status-bedroom?key=27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
     if ('address' in response.json()) and ('name' in response.json()):
         if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
@@ -215,9 +214,9 @@ def main():
         turn_off_humidifier()
     if (humidity < 31) and (today.month < 10) and (today.month > 4):
         turn_on_humidifier()
-    if (humidity < 40) and (today.month > 9) and (today.month < 5):
+    if (humidity < 31) and ((today.month > 9) or (today.month < 5)):
         turn_on_humidifier()
-    if (humidity > 49) and (today.month > 9) and (today.month < 5):
+    if (humidity > 49) and ((today.month > 9) or (today.month < 5)):
         turn_off_humidifier()
     
     # Prevent Sleep of Xiaomi Smart Plug
@@ -236,7 +235,7 @@ def main():
         state['triedTurnedHeat'] = 0
         state['wasTurnedHeat'] = 0
 
-    with open('ac_state.json', 'w') as f:
+    with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as f:
         json.dump(state, f)
 
     if (today.hour > -1) and (today.hour < 7):
@@ -249,9 +248,9 @@ def main():
         turn_on_cool_ac()
     if (temperature < 23.5) and (today.month < 10) and (today.month > 4):
         turn_off_ac()
-    # if (temperature < 20) and (today.month > 9) and (today.month < 5) and (today.hour < 24) and (today.hour > 9):
+    # if (temperature < 20) and ((today.month > 9) or (today.month < 5)) and (today.hour < 24) and (today.hour > 9):
     #     turn_on_heat_ac()
-    if (temperature > 22) and (today.month > 9) and (today.month < 5):
+    if (temperature > 22) and ((today.month > 9) or (today.month < 5)):
         turn_off_ac()
 
 
