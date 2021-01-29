@@ -2,20 +2,19 @@
 
 """Demo file showing how to use the mitemp library."""
 
-import os
-import subprocess
-import paramiko
 import json
 import argparse
 import re
 import datetime
+import paramiko
 import requests
 
 # cmd = ['ssh', 'smart',
-#        'mkdir -p /home/levabd/smart-home-temp-humidity-monitor; cat - > /home/levabd/smart-home-temp-humidity-monitor/lr.json']
+#        'mkdir -p /home/levabd/smart-home-temp-humidity-monitor;
+#           cat - > /home/levabd/smart-home-temp-humidity-monitor/lr.json']
 
 from miio import chuangmi_plug
-from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattBackend
+from btlewrap import available_backends, BluepyBackend
 from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
     MI_TEMPERATURE, MI_HUMIDITY, MI_BATTERY
 
@@ -32,14 +31,26 @@ def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[
 
 def turn_on_humidifier():
     """Turn on humidifier on a first floor."""
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='14f5b868a58ef4ffaef6fece61c65b16', start_id=0, debug=1, lazy_discover=True, model='chuangmi.plug.m1')
-    cP.on()
+    hummidifier_plug = chuangmi_plug.ChuangmiPlug(
+        ip='192.168.19.59',
+        token='14f5b868a58ef4ffaef6fece61c65b16',
+        start_id=0,
+        debug=1,
+        lazy_discover=True,
+        model='chuangmi.plug.m1')
+    hummidifier_plug.on()
 
 
 def turn_off_humidifier():
     """Turn off humidifier on a first floor."""
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='14f5b868a58ef4ffaef6fece61c65b16', start_id=0, debug=1, lazy_discover=True, model='chuangmi.plug.m1')
-    cP.off()
+    hummidifier_plug = chuangmi_plug.ChuangmiPlug(
+        ip='192.168.19.59',
+        token='14f5b868a58ef4ffaef6fece61c65b16',
+        start_id=0,
+        debug=1,
+        lazy_discover=True,
+        model='chuangmi.plug.m1')
+    hummidifier_plug.off()
 
 
 def check_if_ac_off():
@@ -91,7 +102,7 @@ def check_if_ac_heat():
 
 def turn_on_heat_ac():
     """Turn on AC on a first floor for a heating if it was not."""
-    if (state['wasTurnedHeat'] == 1) and not (state['triedTurnedHeat'] == 1):
+    if (state['wasTurnedHeat'] == 1) and not state['triedTurnedHeat'] == 1:
         return
     heat_url = 'http://smart.levabd.pp.ua:2003/heat/key/27fbc501b51b47663e77c46816a'
     ac_heat = check_if_ac_heat()
@@ -102,7 +113,7 @@ def turn_on_heat_ac():
             response = requests.get(heat_url)
             print(response.json())
         else:
-            if (state['triedTurnedHeat'] == 1):
+            if state['triedTurnedHeat'] == 1:
                 state['triedTurnedOff'] = 0
                 state['wasTurnedOff'] = 0
                 state['triedTurnedCool'] = 0
@@ -113,7 +124,7 @@ def turn_on_heat_ac():
 
 def turn_on_cool_ac():
     """Turn on AC on a first floor for a cooling if it was not."""
-    if (state['wasTurnedCool'] == 1) and not (state['triedTurnedCool'] == 1):
+    if (state['wasTurnedCool'] == 1) and not state['triedTurnedCool'] == 1:
         return
     cool_url = 'http://smart.levabd.pp.ua:2003/cool/key/27fbc501b51b47663e77c46816a'
     ac_cool = check_if_ac_cool()
@@ -124,7 +135,7 @@ def turn_on_cool_ac():
             response = requests.get(cool_url)
             print(response.json())
         else:
-            if (state['triedTurnedCool'] == 1):
+            if state['triedTurnedCool'] == 1:
                 state['triedTurnedOff'] = 0
                 state['wasTurnedOff'] = 0
                 state['triedTurnedCool'] = 0
@@ -135,7 +146,7 @@ def turn_on_cool_ac():
 
 def turn_off_ac():
     """Turn off AC on a first floor."""
-    if (state['wasTurnedOff'] == 1) and not (state['triedTurnedOff'] == 1):
+    if (state['wasTurnedOff'] == 1) and not state['triedTurnedOff'] == 1:
         return
     turn_url = 'http://smart.levabd.pp.ua:2003/power-off/key/27fbc501b51b47663e77c46816a'
     ac_off = check_if_ac_off()
@@ -154,7 +165,8 @@ def turn_off_ac():
                 state['triedTurnedHeat'] = 0
                 state['wasTurnedHeat'] = 0
 
-def recordTempHumid(temperature, humidity):
+def record_temp_humid(temperature, humidity):
+    """Record temperature and humidity data for web interface monitor"""
     dicty = {
         "temperature": temperature,
         "humidity": humidity
@@ -218,13 +230,19 @@ def main():
         turn_on_humidifier()
     if (humidity > 49) and ((today.month > 9) or (today.month < 5)):
         turn_off_humidifier()
-    
+
     # Prevent Sleep of Xiaomi Smart Plug
-    cP = chuangmi_plug.ChuangmiPlug(ip='192.168.19.59', token='14f5b868a58ef4ffaef6fece61c65b16', start_id=0, debug=0, lazy_discover=True, model='chuangmi.plug.m1')
-    print(cP.status())
+    hummidifier_plug = chuangmi_plug.ChuangmiPlug(
+        ip='192.168.19.59',
+        token='14f5b868a58ef4ffaef6fece61c65b16',
+        start_id=0,
+        debug=0,
+        lazy_discover=True,
+        model='chuangmi.plug.m1')
+    print(hummidifier_plug.status())
 
     # Record temperature and humidity for monitor
-    recordTempHumid(temperature, humidity)
+    record_temp_humid(temperature, humidity)
 
     # clear env at night
     if today.hour == 4:
@@ -235,8 +253,8 @@ def main():
         state['triedTurnedHeat'] = 0
         state['wasTurnedHeat'] = 0
 
-    with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as f:
-        json.dump(state, f)
+    with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
+        json.dump(state, file)
 
     if (today.hour > -1) and (today.hour < 7):
         turn_off_ac()
