@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-"""Demo file showing how to use the mitemp library."""
-
 import json
 import argparse
 import re
@@ -9,9 +7,9 @@ import datetime
 import paramiko
 import requests
 
-# cmd = ['ssh', 'smart',
-#        'mkdir -p /home/levabd/smart-home-temp-humidity-monitor;
-#           cat - > /home/levabd/smart-home-temp-humidity-monitor/lr.json']
+# cmd ['ssh', 'smart',
+# 'mkdir -p /home/levabd/smart-home-temp-humidity-monitor;
+# cat - > /home/levabd/smart-home-temp-humidity-monitor/lr.json']
 
 from miio import chuangmi_plug
 from btlewrap import available_backends, BluepyBackend
@@ -21,6 +19,7 @@ from mitemp_bt.mitemp_bt_poller import MiTempBtPoller, \
 state = {}
 f = open('/home/pi/smart-climat-daemon/ac_state.json')
 state = json.load(f)
+plug_type = 'chuangmi.plug.m1'
 
 def valid_mitemp_mac(mac, pat=re.compile(r"[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
     """Check for valid mac addresses."""
@@ -37,7 +36,7 @@ def turn_on_humidifier():
         start_id=0,
         debug=1,
         lazy_discover=True,
-        model='chuangmi.plug.m1')
+        model=plug_type)
     hummidifier_plug.on()
 
 
@@ -49,7 +48,7 @@ def turn_off_humidifier():
         start_id=0,
         debug=1,
         lazy_discover=True,
-        model='chuangmi.plug.m1')
+        model=plug_type)
     hummidifier_plug.off()
 
 
@@ -57,28 +56,30 @@ def check_if_ac_off():
     """Check if AC is turned off."""
     status_url = 'http://smart.levabd.pp.ua:2002/status-bedroom?key=27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
-    if ('address' in response.json()) and ('name' in response.json()):
-        if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
-            if response.json()['props']['boot'] == 0:
-                return True
-            return False
+    if ('address' not in response.json()) and ('name' not in response.json()):
+        return None
+    if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
+        if response.json()['props']['boot'] == 0:
+            return True
+        return False
     return None
 
 def check_if_ac_cool():
     """Check if AC is turned for a automate cooling."""
     status_url = 'http://smart.levabd.pp.ua:2002/status-bedroom?key=27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
-    if ('address' in response.json()) and ('name' in response.json()):
-        if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
-            if not response.json()['props']['boot'] == 1:
-                return False
-            if not response.json()['props']['runMode'] == '001':
-                return False
-            if not response.json()['props']['wdNumber'] == 25:
-                return False
-            if not response.json()['props']['windLevel'] == '001':
-                return False
-            return True
+    if ('address' not in response.json()) or ('name' not in response.json()):
+        return None
+    if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
+        if not response.json()['props']['boot'] == 1:
+            return False
+        if not response.json()['props']['runMode'] == '001':
+            return False
+        if not response.json()['props']['wdNumber'] == 25:
+            return False
+        if not response.json()['props']['windLevel'] == '001':
+            return False
+        return True
     return None
 
 
@@ -86,17 +87,18 @@ def check_if_ac_heat():
     """Check if AC is turned for a automate heating."""
     status_url = 'http://smart.levabd.pp.ua:2003/status/key/27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
-    if ('address' in response.json()) and ('name' in response.json()):
-        if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
-            if not response.json()['props']['boot'] == 1:
-                return False
-            if not response.json()['props']['runMode'] == '100':
-                return False
-            if not response.json()['props']['wdNumber'] == 23:
-                return False
-            if not response.json()['props']['windLevel'] == '001':
-                return False
-            return True
+    if ('address' not in response.json()) and ('name' not in response.json()):
+        return None
+    if ((response.json()['name'] == "08bc20043df8") and (response.json()['address'] == "192.168.19.54")):
+        if not response.json()['props']['boot'] == 1:
+            return False
+        if not response.json()['props']['runMode'] == '100':
+            return False
+        if not response.json()['props']['wdNumber'] == 23:
+            return False
+        if not response.json()['props']['windLevel'] == '001':
+            return False
+        return True
     return None
 
 
@@ -199,7 +201,7 @@ def poll_temp_humidity():
     print("Humidity: {}".format(poller.parameter_value(MI_HUMIDITY)))
     return (today, temperature, humidity)
 
-# def scan(args):
+# scan(args):
 #     """Scan for sensors."""
 #     backend = _get_backend(args)
 #     print('Scanning for 10 seconds...')
@@ -217,11 +219,13 @@ def list_backends(_):
 
 
 def main():
-    """Main function.
+    """Main function."""
 
-    """
     # check_if_ac_cool()
     (today, temperature, humidity) = poll_temp_humidity()
+    # Record temperature and humidity for monitor
+    record_temp_humid(temperature, humidity)
+
     if (humidity > 49) and (today.month < 10) and (today.month > 4):
         turn_off_humidifier()
     if (humidity < 31) and (today.month < 10) and (today.month > 4):
@@ -240,9 +244,6 @@ def main():
         lazy_discover=True,
         model='chuangmi.plug.m1')
     print(hummidifier_plug.status())
-
-    # Record temperature and humidity for monitor
-    record_temp_humid(temperature, humidity)
 
     # clear env at night
     if today.hour == 4:
@@ -266,7 +267,7 @@ def main():
         turn_on_cool_ac()
     if (temperature < 23.5) and (today.month < 10) and (today.month > 4):
         turn_off_ac()
-    # if (temperature < 20) and ((today.month > 9) or (today.month < 5)) and (today.hour < 24) and (today.hour > 9):
+    # _if (temperature < 20) and ((today.month > 9) or (today.month < 5)) and (today.hour < 24) and (today.hour > 9):
     #     turn_on_heat_ac()
     if (temperature > 22) and ((today.month > 9) or (today.month < 5)):
         turn_off_ac()
