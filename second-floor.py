@@ -79,8 +79,8 @@ def check_if_ac_cool(room):
     elif room == 'cb':
         status_url = 'http://smart.levabd.pp.ua:2002/status-office?key=27fbc501b51b47663e77c46816a'
     response = requests.get(status_url, timeout=(20, 30))
+    print(response.json())
     if 'Pow' in response.json():
-        print(response.json()['Pow'])
         if (response.json()['Pow'] == "1") and (response.json()['Mode'] == "COOL"):
             return True
         return False
@@ -99,7 +99,7 @@ def set_cool_temp_ac(room, temp):
         temp_url = 'http://smart.levabd.pp.ua:2002/setTemp-office?key=27fbc501b51b47663e77c46816a&temp='
 
     response = requests.get(temp_url + temp)
-    print(response.json())
+    print(response)
 
 
 def turn_on_cool_ac(room):
@@ -137,7 +137,7 @@ def turn_on_cool_ac(room):
         cb_state['triedTurnedCool'] = 1
         cb_state['wasTurnedCool'] = 0
     response = requests.get(cool_url)
-    print(response.json())
+    print(response.)
 
 
 def turn_off_ac(room):
@@ -174,7 +174,7 @@ def turn_off_ac(room):
         cb_state['triedTurnedOff'] = 1
         cb_state['wasTurnedOff'] = 0
     response = requests.get(turn_url)
-    print(response.json())
+    print(response)
 
 def record_temp_humid(temperature, humidity, room):
     """Record temperature and humidity data for web interface monitor"""
@@ -230,8 +230,6 @@ def list_backends(_):
 
 def main():
     """Main function."""
-    print(check_if_ac_off('br'))
-    print(check_if_ac_off('cb'))
 
     # record the office room numbers
     (_, temperature, humidity) = poll_temp_humidity('cb')
