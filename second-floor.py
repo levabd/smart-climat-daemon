@@ -137,7 +137,7 @@ def turn_on_cool_ac(room):
         cb_state['triedTurnedCool'] = 1
         cb_state['wasTurnedCool'] = 0
     response = requests.get(cool_url)
-    print(response.)
+    print(response)
 
 
 def turn_off_ac(room):
