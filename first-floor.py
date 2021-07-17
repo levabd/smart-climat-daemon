@@ -112,6 +112,8 @@ def turn_on_heat_ac():
         if not ac_heat:
             state['triedTurnedHeat'] = 1
             state['wasTurnedHeat'] = 0
+            with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
+                json.dump(state, file)
             response = requests.get(heat_url)
             print(response.json())
         else:
@@ -122,6 +124,8 @@ def turn_on_heat_ac():
                 state['wasTurnedCool'] = 0
                 state['triedTurnedHeat'] = 0
                 state['wasTurnedHeat'] = 1
+                with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
+                    json.dump(state, file)
 
 
 def turn_on_cool_ac():
@@ -134,6 +138,8 @@ def turn_on_cool_ac():
         if not ac_cool:
             state['triedTurnedCool'] = 1
             state['wasTurnedCool'] = 0
+            with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
+                json.dump(state, file)
             response = requests.get(cool_url)
             print(response.json())
         else:
@@ -144,6 +150,8 @@ def turn_on_cool_ac():
                 state['wasTurnedCool'] = 1
                 state['triedTurnedHeat'] = 0
                 state['wasTurnedHeat'] = 0
+                with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
+                    json.dump(state, file)
 
 
 def turn_off_ac():
@@ -156,6 +164,8 @@ def turn_off_ac():
         if not ac_off:
             state['triedTurnedOff'] = 1
             state['wasTurnedOff'] = 0
+            with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
+                json.dump(state, file)
             response = requests.get(turn_url)
             print(response.json())
         else:
@@ -166,6 +176,8 @@ def turn_off_ac():
                 state['wasTurnedCool'] = 0
                 state['triedTurnedHeat'] = 0
                 state['wasTurnedHeat'] = 0
+                with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
+                    json.dump(state, file)
 
 def record_temp_humid(temperature, humidity):
     """Record temperature and humidity data for web interface monitor"""
@@ -226,24 +238,27 @@ def main():
     # Record temperature and humidity for monitor
     record_temp_humid(temperature, humidity)
 
-    if (humidity > 49) and (today.month < 10) and (today.month > 4):
-        turn_off_humidifier()
-    if (humidity < 31) and (today.month < 10) and (today.month > 4):
-        turn_on_humidifier()
-    if (humidity < 31) and ((today.month > 9) or (today.month < 5)):
-        turn_on_humidifier()
-    if (humidity > 49) and ((today.month > 9) or (today.month < 5)):
-        turn_off_humidifier()
+    try:
+        if (humidity > 49) and (today.month < 10) and (today.month > 4):
+            turn_off_humidifier()
+        if (humidity < 31) and (today.month < 10) and (today.month > 4):
+            turn_on_humidifier()
+        if (humidity < 31) and ((today.month > 9) or (today.month < 5)):
+            turn_on_humidifier()
+        if (humidity > 49) and ((today.month > 9) or (today.month < 5)):
+            turn_off_humidifier()
 
-    # Prevent Sleep of Xiaomi Smart Plug
-    hummidifier_plug = chuangmi_plug.ChuangmiPlug(
-        ip='192.168.19.59',
-        token='14f5b868a58ef4ffaef6fece61c65b16',
-        start_id=0,
-        debug=0,
-        lazy_discover=True,
-        model='chuangmi.plug.m1')
-    print(hummidifier_plug.status())
+        # Prevent Sleep of Xiaomi Smart Plug
+        hummidifier_plug = chuangmi_plug.ChuangmiPlug(
+            ip='192.168.19.59',
+            token='14f5b868a58ef4ffaef6fece61c65b16',
+            start_id=0,
+            debug=0,
+            lazy_discover=True,
+            model='chuangmi.plug.m1')
+        print(hummidifier_plug.status())
+    except Exception:
+        print("Can not connect to humidifier")
 
     # clear env at night
     if today.hour == 4:
@@ -253,9 +268,8 @@ def main():
         state['wasTurnedCool'] = 0
         state['triedTurnedHeat'] = 0
         state['wasTurnedHeat'] = 0
-
-    with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
-        json.dump(state, file)
+        with open('/home/pi/smart-climat-daemon/ac_state.json', 'w') as file:
+            json.dump(state, file)
 
     if (today.hour > -1) and (today.hour < 7):
         turn_off_ac()
