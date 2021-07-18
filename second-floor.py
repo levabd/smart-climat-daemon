@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-"""Demo file showing how to use the mitemp library."""
-
 import json
 import argparse
 import re
@@ -66,7 +64,7 @@ def check_if_ac_off(room):
     response = requests.get(status_url, timeout=(20, 30))
     if 'Pow' in response.json():
         print(response.json()['Pow'])
-        if response.json()['Pow'] == "1":
+        if response.json()['Pow'] == "ON":
             return False
         return True
     return None
@@ -81,7 +79,7 @@ def check_if_ac_cool(room):
     response = requests.get(status_url, timeout=(20, 30))
     print(response.json())
     if 'Pow' in response.json():
-        if (response.json()['Pow'] == "1") and (response.json()['Mode'] == "COOL"):
+        if (response.json()['Pow'] == "ON") and (response.json()['Mod'] == "COOL"):
             return True
         return False
     return None
@@ -117,6 +115,8 @@ def turn_on_cool_ac(room):
             br_state['wasTurnedCool'] = 1
             br_state['triedTurnedHeat'] = 0
             br_state['wasTurnedHeat'] = 0
+            with open('/home/pi/smart-climat-daemon/ac_br_state.json', 'w') as file:
+                json.dump(br_state, file)
         elif room == 'cb':
             cb_state['triedTurnedOff'] = 0
             cb_state['wasTurnedOff'] = 0
@@ -124,19 +124,35 @@ def turn_on_cool_ac(room):
             cb_state['wasTurnedCool'] = 1
             cb_state['triedTurnedHeat'] = 0
             cb_state['wasTurnedHeat'] = 0
+            with open('/home/pi/smart-climat-daemon/ac_cb_state.json', 'w') as file:
+                json.dump(cb_state, file)
         return
     cool_url = dummy_ac_url
+    turn_on_url = dummy_ac_url
+    temp_url = dummy_ac_url
     if room == 'br':
+        turn_on_url = 'http://smart.levabd.pp.ua:2002/powerOn-bedroom?key=27fbc501b51b47663e77c46816a'
         cool_url = 'http://smart.levabd.pp.ua:2002/cool-bedroom?autoFan=false&key=27fbc501b51b47663e77c46816a'
+        temp_url = 'http://smart.levabd.pp.ua:2002/setTemp-bedroom?key=27fbc501b51b47663e77c46816a&temp=26'
     elif room == 'cb':
+        turn_on_url = 'http://smart.levabd.pp.ua:2002/powerOn-office?key=27fbc501b51b47663e77c46816a'
         cool_url = 'http://smart.levabd.pp.ua:2002/cool-office?autoFan=false&key=27fbc501b51b47663e77c46816a'
+        temp_url = 'http://smart.levabd.pp.ua:2002/setTemp-office?key=27fbc501b51b47663e77c46816a&temp=26'
     if room == 'br':
         br_state['triedTurnedCool'] = 1
         br_state['wasTurnedCool'] = 0
+        with open('/home/pi/smart-climat-daemon/ac_br_state.json', 'w') as file:
+            json.dump(br_state, file)
     elif room == 'cb':
         cb_state['triedTurnedCool'] = 1
         cb_state['wasTurnedCool'] = 0
+        with open('/home/pi/smart-climat-daemon/ac_cb_state.json', 'w') as file:
+            json.dump(cb_state, file)
+    response = requests.get(temp_url)
+    print(response)
     response = requests.get(cool_url)
+    print(response)
+    response = requests.get(turn_on_url)
     print(response)
 
 
@@ -155,6 +171,8 @@ def turn_off_ac(room):
             br_state['wasTurnedCool'] = 0
             br_state['triedTurnedHeat'] = 0
             br_state['wasTurnedHeat'] = 0
+            with open('/home/pi/smart-climat-daemon/ac_br_state.json', 'w') as file:
+                json.dump(br_state, file)
         elif room == 'cb':
             cb_state['triedTurnedOff'] = 0
             cb_state['wasTurnedOff'] = 1
@@ -162,17 +180,24 @@ def turn_off_ac(room):
             cb_state['wasTurnedCool'] = 0
             cb_state['triedTurnedHeat'] = 0
             cb_state['wasTurnedHeat'] = 0
+            with open('/home/pi/smart-climat-daemon/ac_cb_state.json', 'w') as file:
+                json.dump(cb_state, file)
     turn_url = dummy_ac_url
     if room == 'br':
         turn_url = 'http://smart.levabd.pp.ua:2002/powerOff-bedroom?key=27fbc501b51b47663e77c46816a'
     elif room == 'cb':
-        turn_url = 'http://smart.levabd.pp.ua:2002/powerOff-office?autoFan=false&key=27fbc501b51b47663e77c46816a'
+        turn_url = 'http://smart.levabd.pp.ua:2002/powerOff-office?key=27fbc501b51b47663e77c46816a'
     if room == 'br':
         br_state['triedTurnedOff'] = 1
         br_state['wasTurnedOff'] = 0
+        with open('/home/pi/smart-climat-daemon/ac_br_state.json', 'w') as file:
+            json.dump(br_state, file)
     elif room == 'cb':
         cb_state['triedTurnedOff'] = 1
-        cb_state['wasTurnedOff'] = 0
+        cb_state['wasTurnedOff'] = 0  
+        with open('/home/pi/smart-climat-daemon/ac_cb_state.json', 'w') as file:
+            json.dump(cb_state, file)
+            
     response = requests.get(turn_url)
     print(response)
 
@@ -231,10 +256,6 @@ def list_backends(_):
 def main():
     """Main function."""
 
-    # record the office room numbers
-    (_, temperature, humidity) = poll_temp_humidity('cb')
-    record_temp_humid(temperature, humidity, 'cb')
-
     # check bedroom
     (today, temperature, humidity) = poll_temp_humidity('br')
     # if (humidity > 49) and (today.month < 10) and (today.month > 4):
@@ -273,24 +294,29 @@ def main():
         cb_state['wasTurnedCool'] = 0
         cb_state['triedTurnedHeat'] = 0
         cb_state['wasTurnedHeat'] = 0
+        with open('/home/pi/smart-climat-daemon/ac_br_state.json', 'w') as file:
+            json.dump(br_state, file)
+        with open('/home/pi/smart-climat-daemon/ac_cb_state.json', 'w') as file:
+            json.dump(cb_state, file)
 
-    with open('/home/pi/smart-climat-daemon/ac_br_state.json', 'w') as file:
-        json.dump(br_state, file)
-    with open('/home/pi/smart-climat-daemon/ac_cb_state.json', 'w') as file:
-        json.dump(cb_state, file)
-
-    if (temperature > 24.0) and (today.month < 6) and (today.month > 3) and (today.hour < 11) and (today.hour > 3):
+    # if (temperature > 24.0) and (today.month < 6) and (today.month > 3) and (today.hour < 11) and (today.hour > 3):
+    #    turn_on_cool_ac('br')
+    if (temperature > 28) and (today.hour < 24) and (today.hour > 10):
         turn_on_cool_ac('br')
-    if (temperature > 27) and (today.hour < 24) and (today.hour > 10):
+    if (temperature > 25.3) and (today.month < 11) and (today.month > 4) and (today.hour < 10) and (today.hour > 4):
         turn_on_cool_ac('br')
-    if (temperature > 24.9) and (today.month < 10) and (today.month > 5) and (today.hour < 11) and (today.hour > 3):
-        turn_on_cool_ac('br')
-    if temperature < 22.5:
+    if (temperature < 23.3) and (today.hour < 10) and (today.hour > 4):
+        turn_off_ac('br')
+    if (temperature < 19) and (today.hour < 24) and (today.hour > 10):
         turn_off_ac('br')
     # _if (temperature < 20) and ((today.month > 9) or (today.month < 5)) and (today.hour < 24) and (today.hour > 9):
     #     turn_on_heat_ac()
     # if (temperature > 22) and ((today.month > 9) or (today.month < 5)):
     #     turn_off_ac()
+
+    # record the office room numbers
+    (_, temperature, humidity) = poll_temp_humidity('cb')
+    record_temp_humid(temperature, humidity, 'cb')
 
 
 if __name__ == '__main__':
