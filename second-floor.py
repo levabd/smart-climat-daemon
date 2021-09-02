@@ -301,13 +301,13 @@ def main():
 
     # if (temperature > 24.0) and (today.month < 6) and (today.month > 3) and (today.hour < 11) and (today.hour > 3):
     #    turn_on_cool_ac('br')
-    if (temperature > 28) and (today.hour < 24) and (today.hour > 10):
+    if (temperature > 32) and (today.hour < 24) and (today.hour > 7):
         turn_on_cool_ac('br')
-    if (temperature > 25.3) and (today.month < 11) and (today.month > 4) and (today.hour < 10) and (today.hour > 4):
+    if (temperature > 25.3) and (today.month < 11) and (today.month > 4) and (today.hour < 8) and (today.hour > 4):
         turn_on_cool_ac('br')
-    if (temperature < 23.3) and (today.hour < 10) and (today.hour > 4):
+    if (temperature < 23.3) and (today.hour < 8) and (today.hour > 4):
         turn_off_ac('br')
-    if (temperature < 19) and (today.hour < 24) and (today.hour > 10):
+    if (temperature < 19) and (today.hour < 24) and (today.hour > 8):
         turn_off_ac('br')
     # _if (temperature < 20) and ((today.month > 9) or (today.month < 5)) and (today.hour < 24) and (today.hour > 9):
     #     turn_on_heat_ac()
