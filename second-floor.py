@@ -69,6 +69,21 @@ def check_if_ac_off(room):
         return True
     return None
 
+def check_if_ac_heat(room):
+    """Check if AC is turned for a automate cooling."""
+    status_url = dummy_ac_url
+    if room == 'br':
+        status_url = 'http://smart.levabd.pp.ua:2002/status-bedroom?key=27fbc501b51b47663e77c46816a'
+    elif room == 'cb':
+        status_url = 'http://smart.levabd.pp.ua:2002/status-office?key=27fbc501b51b47663e77c46816a'
+    response = requests.get(status_url, timeout=(20, 30))
+    print(response.json())
+    if 'Pow' in response.json():
+        if (response.json()['Pow'] == "ON") and (response.json()['Mod'] == "HEAT"):
+            return True
+        return False
+    return None
+
 def check_if_ac_cool(room):
     """Check if AC is turned for a automate cooling."""
     status_url = dummy_ac_url
@@ -88,7 +103,7 @@ def set_cool_temp_ac(room, temp):
     """Set AC temerature of cooling if AC already turned cool."""
     state = {}
     state = br_state if room == 'br' else cb_state # 'cb'
-    if not state['wasTurnedCool'] == 1 and check_if_ac_cool(room):
+    if (not state['wasTurnedCool'] == 1 and check_if_ac_cool(room)) or (check_if_ac_heat('br')):
         return
     temp_url = dummy_ac_url
     if room == 'br':
@@ -105,7 +120,7 @@ def turn_on_cool_ac(room):
     state = {}
     state = br_state if room == 'br' else cb_state # 'cb'
     ac_cool = check_if_ac_cool(room)
-    if ((state['wasTurnedCool'] == 1) and not state['triedTurnedCool'] == 1) or (ac_cool is None):
+    if ((state['wasTurnedCool'] == 1) and not state['triedTurnedCool'] == 1) or (ac_cool is None) or (check_if_ac_heat('br')):
         return
     if ac_cool and (state['triedTurnedCool'] == 1):
         if room == 'br':
@@ -303,11 +318,11 @@ def main():
     #    turn_on_cool_ac('br')
     if (temperature > 32) and (today.hour < 24) and (today.hour > 7):
         turn_on_cool_ac('br')
-    if (temperature > 25.3) and (today.month < 11) and (today.month > 4) and (today.hour < 8) and (today.hour > 4):
+    if (temperature > 25.3) and (today.month < 10) and (today.month > 4) and (today.hour < 8) and (today.hour > 4):
         turn_on_cool_ac('br')
-    if (temperature < 23.3) and (today.hour < 8) and (today.hour > 4):
+    if (temperature < 23.3) and (today.hour < 8) and (today.hour > 4) and (not(check_if_ac_heat('br'))):
         turn_off_ac('br')
-    if (temperature < 19) and (today.hour < 24) and (today.hour > 8):
+    if (temperature < 19) and (today.hour < 24) and (today.hour > 8) and (not(check_if_ac_heat('br'))):
         turn_off_ac('br')
     # _if (temperature < 20) and ((today.month > 9) or (today.month < 5)) and (today.hour < 24) and (today.hour > 9):
     #     turn_on_heat_ac()
