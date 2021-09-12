@@ -384,6 +384,8 @@ def main():
         turn_off_ac('br')
     if (temperature > 25) and (today.month == 10) and (today.hour > 22):
         turn_off_ac('br')
+    if (today.month == 10) and (today.hour == 0) and (today.minute == 0):
+        turn_off_ac('br')
     if (temperature < 23.3) and (today.hour < 8) and (today.hour > 4) and (not(check_if_ac_heat('br'))):
         turn_off_ac('br')
     if (temperature < 19) and (today.hour < 24) and (today.hour > 8) and (not(check_if_ac_heat('br'))):
