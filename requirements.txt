@@ -21,7 +21,7 @@ keyring==17.1.1
 keyrings.alt==3.1.1
 natsort==7.1.1
 netifaces==0.10.9
-paramiko==2.7.2
+paramiko==2.10.1
 pexpect==4.8.0
 ptyprocess==0.7.0
 pycparser==2.20
